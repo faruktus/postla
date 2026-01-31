@@ -14,6 +14,9 @@ smtp_server_url = "mail.gmx.net"
 smtp_port = 465
 download_folder = "./download/"
 
+# V V V V V V V V V V V V V
+### DEFINE FANCY SCRIPT ###
+
 def pdfsplit(subject, attachment_path):
     # make a list of given split points / names
     splitlist=[]
@@ -57,6 +60,8 @@ def pdfsplit(subject, attachment_path):
             # reset PdfWriter
             writer = PdfWriter()
 
+### END OF SCRIPT DEFINITION ### 
+# ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^  
 
 
 # check inbox for new unseen mail
@@ -77,9 +82,9 @@ while True:
             subject = message.get('Subject')
             sender = message.get('From')
             
-
+          # V V V V V V V V V V V V V
           # download attachment start  
-          
+
             if message.get_content_maintype() != 'multipart':
                 continue
             
@@ -100,14 +105,13 @@ while True:
                         fp.close()
 
           # download attachment finish
+          # ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ 
 
-                ####### FUNCTION INSERT ###########
+                    ###### FUNCTION INSERT ###########
                     pdfsplit(subject, sv_path) 
-                    time.sleep(1)
+                    ###### FUNCTION END ###############
 
-                ###### FUNCTION END ###############
-
-        # send mail
+            # send mail
             if subject.split()[0] == "pdf":
                 from_email = username
                 to_email = sender
@@ -116,6 +120,7 @@ while True:
                 email_message['From'] = from_email
                 email_message['Subject'] = 'dereoida'
                 email_message.set_content("Sehr geehrter Hr. Lucifer! deimuada is a gehsteigpanza")
+                #  V V V V V V V V V V
                 # add attachment start
                 for pdfname in os.listdir("./upload"):
                     with open("./upload/" + pdfname, "rb") as f:
@@ -126,6 +131,7 @@ while True:
                                 subtype="pdf"
                                 )
                 # add attachment finish
+                # ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ 
 
                 # delete files from folder download and upload
                 for filename in os.listdir("./upload"):
@@ -145,5 +151,3 @@ while True:
                 print("wrong subject")
     else:
         print("status 0")
-
-
