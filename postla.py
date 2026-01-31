@@ -4,6 +4,7 @@ from smtplib import SMTP_SSL, SMTP_SSL_PORT
 from email.message import EmailMessage
 import time
 import os
+from pypdf import PdfReader, PdfWriter
 
 # login and mail data
 username = "batla@gmx.at"
@@ -13,11 +14,49 @@ smtp_server_url = "mail.gmx.net"
 smtp_port = 465
 download_folder = "./download/"
 
-def duawos(subject):
-    if subject == "three":
-        print("THREEEEEEE")
-    if subject == "two":
-        print("TWOOOOOOO")
+def pdfsplit(subject, attachment_path):
+    # make a list of given split points / names
+    splitlist=[]
+    for x in subject.split()[1:]:
+        try:
+            number = int(x[:x.find("_")])
+        except:
+            print("Number not found")
+        try:
+            name = x[x.find("_")+1:] + str(".pdf")
+        except:
+            print("Name not found")
+
+        try:
+            splitlist.append([number, name])
+        except:
+            print("Creation of list not possible")
+
+    # adding the starting page for each splitpoint
+    temp_number=0
+    for x in splitlist:
+        if temp_number == 0:
+            x.insert(0, 1)
+            temp_number = x[1]
+        else:
+            x.insert(0, temp_number)
+            temp_number = x[1]
+
+    # write pdf files
+    with open(attachment_path,'rb') as pdf_file:
+        reader = PdfReader(pdf_file)
+        writer = PdfWriter()
+
+        for x in splitlist:
+            for page in reader.pages[x[0]:x[1]+1]:
+                writer.add_page(page)
+
+                with open("./upload/" + x[2], 'wb') as output_pdf:
+                    writer.write(output_pdf)
+                    
+            # reset PdfWriter
+            writer = PdfWriter()
+
 
 while True:
     # check inbox for new unseen mail
@@ -36,6 +75,7 @@ while True:
             message = email.message_from_bytes(data[0][1])
             subject = message.get('Subject')
             sender = message.get('From')
+            
 
           # download attachment start  
           
@@ -49,6 +89,7 @@ while True:
                     continue
 
                 filename=part.get_filename()
+                time.sleep(10)
                 if filename is not None:
                     sv_path = os.path.join(download_folder, filename)
                     if not os.path.isfile(sv_path):
@@ -59,8 +100,11 @@ while True:
 
           # download attachment finish
 
+                ####### FUNCTION INSERT ###########
+                    pdfsplit(subject, sv_path) 
+                    time.sleep(1)
 
-            duawos(subject)
+                ###### FUNCTION END ###############
 
         # send mail
             if subject.split()[0] == "pdf":
@@ -72,6 +116,7 @@ while True:
                 email_message['Subject'] = 'dereoida'
                 email_message.set_content("Sehr geehrter Hr. Lucifer! deimuada is a gehsteigpanza")
                 # add attachment start
+                """
                 with open("testpdf.pdf", "rb") as f:
                     email_message.add_attachment(
                             f.read(),
@@ -80,7 +125,7 @@ while True:
                             subtype="pdf"
                             )
                 # add attachment finish
-
+                """
                 smtp_server = SMTP_SSL(smtp_server_url, port=smtp_port)
                 smtp_server.set_debuglevel(1)
                 smtp_server.login(username, password)
