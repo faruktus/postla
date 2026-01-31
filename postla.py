@@ -33,10 +33,10 @@ def pdfsplit(subject, attachment_path):
             print("Creation of list not possible")
 
     # adding the starting page for each splitpoint
-    temp_number=0
+    temp_number="deimuada"
     for x in splitlist:
-        if temp_number == 0:
-            x.insert(0, 1)
+        if temp_number == "deimuada":
+            x.insert(0, 0)
             temp_number = x[1]
         else:
             x.insert(0, temp_number)
@@ -48,7 +48,7 @@ def pdfsplit(subject, attachment_path):
         writer = PdfWriter()
 
         for x in splitlist:
-            for page in reader.pages[x[0]:x[1]+1]:
+            for page in reader.pages[x[0]:x[1]]:
                 writer.add_page(page)
 
                 with open("./upload/" + x[2], 'wb') as output_pdf:
@@ -58,8 +58,9 @@ def pdfsplit(subject, attachment_path):
             writer = PdfWriter()
 
 
+
+# check inbox for new unseen mail
 while True:
-    # check inbox for new unseen mail
     time.sleep(5)
     imap = imaplib.IMAP4_SSL(imap_server)
     imap.login(username, password)
@@ -116,16 +117,24 @@ while True:
                 email_message['Subject'] = 'dereoida'
                 email_message.set_content("Sehr geehrter Hr. Lucifer! deimuada is a gehsteigpanza")
                 # add attachment start
-                """
-                with open("testpdf.pdf", "rb") as f:
-                    email_message.add_attachment(
-                            f.read(),
-                            filename="testpdf.pdf",
-                            maintype="application",
-                            subtype="pdf"
-                            )
+                for pdfname in os.listdir("./upload"):
+                    with open("./upload/" + pdfname, "rb") as f:
+                        email_message.add_attachment(
+                                f.read(),
+                                filename=pdfname,
+                                maintype="application",
+                                subtype="pdf"
+                                )
                 # add attachment finish
-                """
+
+                # delete files from folder download and upload
+                for filename in os.listdir("./upload"):
+                    os.remove("./upload/" + filename)
+
+                for filename in os.listdir("./download"):
+                    os.remove("./download/" + filename)
+                
+
                 smtp_server = SMTP_SSL(smtp_server_url, port=smtp_port)
                 smtp_server.set_debuglevel(1)
                 smtp_server.login(username, password)
