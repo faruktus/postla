@@ -16,6 +16,6 @@ e.g. Subject:
 creates 3 pdf:
 - untilthree.pdf (page 1 until 3)
 - untilsix.pdf (page 4 until 6)
-- untilnine.pdf (page 9 until the end of pdf)
+- untilnine.pdf (page 7 until 9)
 
 
