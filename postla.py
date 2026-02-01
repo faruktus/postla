@@ -6,6 +6,7 @@ import time
 import os
 from pypdf import PdfReader, PdfWriter
 
+
 # login and mail data
 username = "batla@gmx.at"
 password = input("Type PW: ")
@@ -64,6 +65,8 @@ def pdfsplit(subject, attachment_path):
 # ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^  
 
 
+# >>>>>>>>>>>>>>>>> STARTING MAIL OPERATIONS <<<<<<<<<<<<<<<<<<<<<<<<
+
 # check inbox for new unseen mail
 while True:
     time.sleep(5)
@@ -118,11 +121,15 @@ while True:
                 email_message = EmailMessage()
                 email_message['To'] = to_email
                 email_message['From'] = from_email
-                email_message['Subject'] = 'dereoida'
-                email_message.set_content("Sehr geehrter Hr. Lucifer! deimuada is a gehsteigpanza")
+                email_message['Subject'] = 'dere oida'
+                email_message.set_content("Vanülle schmeckt vui noch Weihnochtn")
                 #  V V V V V V V V V V
                 # add attachment start
-                for pdfname in os.listdir("./upload"):
+                upload_folder = os.listdir("./upload")
+                if "NONE" in upload_folder:
+                    upload_folder.remove("NONE")
+
+                for pdfname in upload_folder:
                     with open("./upload/" + pdfname, "rb") as f:
                         email_message.add_attachment(
                                 f.read(),
@@ -139,6 +146,10 @@ while True:
 
                 for filename in os.listdir("./download"):
                     os.remove("./download/" + filename)
+
+                # create NONE for easier github interaction
+                open('./download/NONE', 'a').close()
+                open('./upload/NONE', 'a').close()
                 
 
                 smtp_server = SMTP_SSL(smtp_server_url, port=smtp_port)
