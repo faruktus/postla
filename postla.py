@@ -161,4 +161,4 @@ while True:
             else:
                 print("wrong subject")
     else:
-        print("status 0")
+        print("Checking Inbox...")
