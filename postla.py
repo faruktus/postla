@@ -122,7 +122,7 @@ while True:
                 email_message['To'] = to_email
                 email_message['From'] = from_email
                 email_message['Subject'] = 'dere oida'
-                email_message.set_content("Vanülle schmeckt vui noch Weihnochtn")
+                email_message.set_content("Vanülle schmeckt vui noch Weihnochtn!")
                 #  V V V V V V V V V V
                 # add attachment start
                 upload_folder = os.listdir("./upload")
