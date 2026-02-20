@@ -5,22 +5,12 @@ from email.message import EmailMessage
 import time
 import sys, os
 from pypdf import PdfReader, PdfWriter
-from contextlib import contextmanager
-
-# script for console output suprresion
-def suppress_stdout():
-    with open(os.devnull, "w") as devnull:
-        old_stdout = sys.stdout
-        sys.stdout = devnull
-        try:
-            yield
-        finally:
-            sys.stdout = old_stdout
+import contextlib
 
 
 # login and mail data
 username = "batla@gmx.at"
-password = "Gehsteigpanzer42"
+password = input("PW: ")
 imap_server = "imap.gmx.net"
 smtp_server_url = "mail.gmx.net"
 smtp_port = 465
@@ -126,7 +116,7 @@ while True:
                 upload_folder = os.listdir("./upload")
                 if "NONE" in upload_folder:
                     upload_folder.remove("NONE")
-                
+               
                 for pdfname in upload_folder:
                     with open("./upload/" + pdfname, "rb") as f:
                         email_message.add_attachment(
