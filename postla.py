@@ -3,13 +3,24 @@ import email
 from smtplib import SMTP_SSL, SMTP_SSL_PORT
 from email.message import EmailMessage
 import time
-import os
+import sys, os
 from pypdf import PdfReader, PdfWriter
+from contextlib import contextmanager
+
+# script for console output suprresion
+def suppress_stdout():
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
 
 
 # login and mail data
 username = "batla@gmx.at"
-password = input("Type PW: ")
+password = "Gehsteigpanzer42"
 imap_server = "imap.gmx.net"
 smtp_server_url = "mail.gmx.net"
 smtp_port = 465
@@ -18,47 +29,29 @@ download_folder = "./download/"
 # V V V V V V V V V V V V V
 ### DEFINE FANCY SCRIPT ###
 
-def pdfsplit(subject, attachment_path):
-    # make a list of given split points / names
-    splitlist=[]
-    for x in subject.split()[1:]:
-        try:
-            number = int(x[:x.find("_")])
-        except:
-            print("Number not found")
-        try:
-            name = x[x.find("_")+1:] + str(".pdf")
-        except:
-            print("Name not found")
-
-        try:
-            splitlist.append([number, name])
-        except:
-            print("Creation of list not possible")
-
-    # adding the starting page for each splitpoint
-    temp_number="deimuada"
+def pdfsplit(splitlist, attachment_path):
+    page_dict={}
     for x in splitlist:
-        if temp_number == "deimuada":
-            x.insert(0, 0)
-            temp_number = x[1]
-        else:
-            x.insert(0, temp_number)
-            temp_number = x[1]
+        colon_pos = x.find(':')
+        hyphen_pos = x.find('-')
 
-    # write pdf files
+        title = x[:colon_pos]
+        firstnumber = int(x[(colon_pos+2):hyphen_pos].strip()) - 1
+        secondnumber = int(x[(hyphen_pos+1):].strip()) 
+
+        page_dict[title] = [firstnumber, secondnumber]
+
     with open(attachment_path,'rb') as pdf_file:
         reader = PdfReader(pdf_file)
         writer = PdfWriter()
 
-        for x in splitlist:
-            for page in reader.pages[x[0]:x[1]]:
+        for k, v in page_dict.items():
+            for page in reader.pages[v[0]:v[1]]:
                 writer.add_page(page)
 
-                with open("./upload/" + x[2], 'wb') as output_pdf:
+                with open("./upload/" + k, 'wb') as output_pdf:
                     writer.write(output_pdf)
-                    
-            # reset PdfWriter
+
             writer = PdfWriter()
 
 ### END OF SCRIPT DEFINITION ### 
@@ -82,12 +75,14 @@ while True:
             _, data = imap.fetch(msgnum, "(RFC822)")
 
             message = email.message_from_bytes(data[0][1])
+
+            body = message.get_payload()[0].get_payload()
             subject = message.get('Subject')
             sender = message.get('From')
             
           # V V V V V V V V V V V V V
           # download attachment start  
-
+          
             if message.get_content_maintype() != 'multipart':
                 continue
             
@@ -97,12 +92,14 @@ while True:
                 if part.get('Content-Disposition') is None:
                     continue
 
-                filename=part.get_filename()
-                time.sleep(10)
+                # get Mail Text / Split Points
+                splitpoint_list = body.split("\n")
+                splitpoints = [x.strip('\r') for x in splitpoint_list if x]
+
+                filename = part.get_filename()
                 if filename is not None:
                     sv_path = os.path.join(download_folder, filename)
                     if not os.path.isfile(sv_path):
-                        print(sv_path)
                         fp = open(sv_path, 'wb')
                         fp.write(part.get_payload(decode=True))
                         fp.close()
@@ -111,7 +108,7 @@ while True:
           # ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ 
 
                     ###### FUNCTION INSERT ###########
-                    pdfsplit(subject, sv_path) 
+                    pdfsplit(splitpoints, sv_path) 
                     ###### FUNCTION END ###############
 
             # send mail
@@ -123,12 +120,13 @@ while True:
                 email_message['From'] = from_email
                 email_message['Subject'] = 'dere oida'
                 email_message.set_content("Vanülle schmeckt vui noch Weihnochtn!")
+
                 #  V V V V V V V V V V
                 # add attachment start
                 upload_folder = os.listdir("./upload")
                 if "NONE" in upload_folder:
                     upload_folder.remove("NONE")
-
+                
                 for pdfname in upload_folder:
                     with open("./upload/" + pdfname, "rb") as f:
                         email_message.add_attachment(
