@@ -1,17 +1,15 @@
 import imaplib
 import email
-from email import policy
 from smtplib import SMTP_SSL, SMTP_SSL_PORT
 from email.message import EmailMessage
 import time
 import sys, os
 from pypdf import PdfReader, PdfWriter
-import contextlib
 
 
 # login and mail data
 username = "batla@gmx.at"
-password = "Gehsteigpanzer42"
+password = input("PW: ")
 imap_server = "imap.gmx.net"
 smtp_server_url = "mail.gmx.net"
 smtp_port = 465
@@ -40,7 +38,7 @@ def pdfsplit(splitlist, attachment_path):
             for page in reader.pages[v[0]:v[1]]:
                 writer.add_page(page)
 
-                with open("./upload/" + k, 'wb') as output_pdf:
+                with open("./upload/" + k + ".pdf", 'wb') as output_pdf:
                     writer.write(output_pdf)
 
             writer = PdfWriter()
@@ -72,17 +70,7 @@ while True:
             _, data = imap.fetch(msgnum, "(RFC822)")
 
             message = email.message_from_bytes(data[0][1])
-            #BODY
-            body = get_text(message)
-            body = str(body, 'utf-8')
-            #BODY
-            
-            
-
-            #body = message.get_payload()[0].get_payload()
-            time.sleep(1)
-            print(body)
-            time.sleep(3)
+            body = str(get_text(message), 'utf-8')
             subject = message.get('Subject')
             sender = message.get('From')
             
@@ -100,11 +88,7 @@ while True:
 
                 # get Mail Text / Split Points
                 splitpoint_list = body.split("\n")
-                print(splitpoint_list)
                 splitpoints = [x.strip('\r') for x in splitpoint_list if x and x != '\r']
-                time.sleep(1)
-                print(splitpoints)
-                time.sleep(3)
 
                 filename = part.get_filename()
                 if filename is not None:
